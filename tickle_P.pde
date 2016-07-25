@@ -3,14 +3,13 @@ import processing.serial.*;
 Serial myPort;
 LineChart line_chart;
 
-int limit_t = 10;  // top of limit
-int limit_b = 9;  // bottom of limit
+int limit_t = 20;  // top of limit
+int limit_b = 5;  // bottom of limit
 int r_val;  // resistance value
 color backColor = color(0);
 boolean canMoveForward = true;
 boolean canMoveReverse = true;
 boolean start = false;
-boolean stopper = false;
 
 void setup() {
   size(600, 600);
@@ -28,7 +27,6 @@ void draw() {
   line_chart.draw();
 
   if (start) tickle();
-  movingControl();
 }
 
 void tickle() {
@@ -87,13 +85,9 @@ void movingStop() {
 }
 
 void keyPressed() {
-  if (stopper) {
-    if (r_val < limit_b || limit_t < r_val) {
-      canMoveReverse = false;
-      canMoveForward = false;
-      movingStop();
-      println("eiya");
-    }
+  if (r_val < limit_b || limit_t < r_val) {
+    movingStop();
+    println("STOP");
   }
 
   switch(keyCode) {
@@ -103,47 +97,17 @@ void keyPressed() {
   case LEFT:
     if (canMoveReverse) movingReverse();
     break;
+  case ENTER:
+    start = true;
+    break;
+  case DELETE:
+    start = false;
+    break;
   }
-  stopper = true;
-  
-  if(keyCode == ENTER) start = true;
-  else if(keyCode == DELETE) start = false;
-
-  /*
-  if (!start) {
-   movingControl();
-   
-   switch(keyCode) {
-   case RIGHT:
-   if (canMoveForward) movingForward();
-   break;
-   case LEFT:
-   if (canMoveReverse) movingReverse();
-   break;
-   case DOWN:
-   movingStop();
-   println("STOP");
-   break;
-   case ENTER:
-   start = true;
-   break;
-   }
-   } else {
-   switch(keyCode) {
-   case ENTER:
-   start = true;
-   movingForward();
-   break;
-   }
-   start = false;
-   movingStop();
-   }
-   */
 }
 
 void keyReleased() {
   movingStop();
-  stopper = false;
 }
 
 void readSerial() {
