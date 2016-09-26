@@ -1,10 +1,12 @@
 import java.util.*;
 import processing.serial.*;  
+import controlP5.*;
+
 Serial myPort;
 LineChart line_chart;
-
-int limit_t = 20;  // top of limit
-int limit_b = 5;  // bottom of limit
+ControlP5 cp5;
+int limit_t = 895;  // top of limit
+int limit_b = 818;  // bottom of limit
 int r_val;  // resistance value
 color backColor = color(0);
 boolean canMoveForward = true;
@@ -12,10 +14,13 @@ boolean canMoveReverse = true;
 boolean start = false;
 
 void setup() {
-  size(600, 600);
+  size(600, 600);  
+  cp5 = new ControlP5(this);
+  cp5.addSlider("limit_t").setPosition(20, 60).setSize(200, 15).setRange(0, 1023).setValue(limit_t);
+  cp5.addSlider("limit_b").setPosition(20, 80).setSize(200, 15).setRange(0, 1023).setValue(limit_b);
 
   println(Serial.list());
-  myPort = new Serial(this, Serial.list()[0], 9600);
+  myPort = new Serial(this, Serial.list()[1], 9600);
   line_chart = new LineChart(1024);
 }
 
@@ -35,15 +40,15 @@ void tickle() {
 }
 
 void draw_threshold() {
-  int y_top = (height-50) - limit_t;
-  int y_bottom = (height-50) - limit_b;
+  int y_t = (height-50) - int(limit_t/1024.0 * (height-100));
+  int y_b = (height-50) - int(limit_b/1024.0 * (height-100));
 
   fill(0);
   rect(0, 50, width, height-100);
 
   stroke(255, 255, 0);
-  line(0, y_top, width, y_top);
-  line(0, y_bottom, width, y_bottom);
+  line(0, y_t, width, y_t);
+  line(0, y_b, width, y_b);
 
   fill(0, 255, 0);
   textSize(20);
@@ -60,7 +65,8 @@ void movingControl() {
   if (r_val < limit_b) {
     canMoveForward = true;
     canMoveReverse = false;
-  } else if (limit_t < r_val) {
+  } 
+  else if (limit_t < r_val) {
     canMoveReverse = true;
     canMoveForward = false;
   }
@@ -111,7 +117,7 @@ void keyReleased() {
 }
 
 void readSerial() {
-  while (myPort.available() > 0) {
+  while (myPort.available () > 0) {
     String l = myPort.readStringUntil(10);
     if (l == null) continue;
     l = trim(l);
@@ -122,3 +128,4 @@ void readSerial() {
     //println("r_val = "+r_val);
   }
 }
+
