@@ -2,16 +2,21 @@ import java.util.*;
 import processing.serial.*;  
 import controlP5.*;
 
-Serial myPort;
-LineChart line_chart;
+Serial myPortA;
+Serial myPortB;
+LineChart line_chartA;
+LineChart line_chartB;
 ControlP5 cp5;
 int limit_t = 895;  // top of limit
 int limit_b = 818;  // bottom of limit
-int r_val;  // resistance value
+int r_valA;  // resistance value mortorA
+int r_valB;  // resistance value mortorB
+int mortor = 1;  // 1:A, 2:B
 color backColor = color(0);
 boolean canMoveForward = true;
 boolean canMoveReverse = true;
 boolean start = false;
+boolean stop = false;
 
 void setup() {
   size(600, 600);  
@@ -21,22 +26,42 @@ void setup() {
 
   println(Serial.list());
   myPort = new Serial(this, Serial.list()[1], 9600);
-  line_chart = new LineChart(1024);
+  myPort.clear();
+  myPort.bufferUntil('\n');
+  line_chartA = new LineChart(1024);
+  line_chartB = new LineChart(1024);
 }
 
 void draw() {
-  readSerial();
   background(backColor, 100);
 
   draw_threshold();
-  line_chart.draw();
+  line_chartA.draw();
+  line_chartB.draw();
 
   if (start) tickle();
+  if (stop) {
+    movingControlA();
+    movingControlB();
+    if (!canMoveForward) {
+      if (limit_t < r_valA) {
+        movingReverse();
+      }
+    } 
+    else if (!canMoveReverse) {
+      if (r_valA < limit_b) {
+        movingForward();
+      }
+    } 
+    else {
+      movingStop();
+    }
+  }
 }
 
 void tickle() {
-  if (r_val < limit_b) movingForward();
-  if (limit_t < r_val) movingReverse();
+  if (r_valA < limit_b) movingForward();
+  if (limit_t < r_valA) movingReverse();
 }
 
 void draw_threshold() {
@@ -52,24 +77,39 @@ void draw_threshold() {
 
   fill(0, 255, 0);
   textSize(20);
-  text(String.format("val = %d", r_val), width - 120, height - 20);
+  text(String.format("val = %d", r_valA), width - 120, height - 20);
 
   text("frameRate = " + frameRate, 20, height - 20);
 }
 
-void movingControl() {
-  if (limit_b <= r_val && r_val <= limit_t) {
+void movingControlA() {
+  if (limit_b <= r_valA && r_valA <= limit_t) {
     canMoveForward = true;
     canMoveReverse = true;
   }
-  if (r_val < limit_b) {
+  if (r_valA < limit_b) {
     canMoveForward = true;
     canMoveReverse = false;
   } 
-  else if (limit_t < r_val) {
+  else if (limit_t < r_valA) {
     canMoveReverse = true;
     canMoveForward = false;
   }
+}
+void movingControlB() {
+  if (limit_b <= r_valB && r_valB <= limit_t) {
+    canMoveForward = true;
+    canMoveReverse = true;
+  }
+  if (r_valB < limit_b) {
+    canMoveForward = true;
+    canMoveReverse = false;
+  } 
+  else if (limit_t < r_valB) {
+    canMoveReverse = true;
+    canMoveForward = false;
+  }
+  println(canMoveForward + " _ " + canMoveReverse);
 }
 
 void movingForward() {
@@ -90,42 +130,71 @@ void movingStop() {
   println("STOP");
 }
 
-void keyPressed() {
-  if (r_val < limit_b || limit_t < r_val) {
-    movingStop();
-    println("STOP");
-  }
+void movingForwardB() {
+  backColor = color(255, 0, 0);
+  myPort.write(4);
+  println("FOWARD");
+}
 
+void movingReverseB() {
+  backColor = color(0, 0, 255);
+  myPort.write(5);
+  println("REVERSE");
+}
+
+void movingStopB() {
+  backColor = color(0);
+  myPort.write(3);
+  println("STOP");
+}
+
+void keyPressed() {
   switch(keyCode) {
   case RIGHT:
-    if (canMoveForward) movingForward();
+    if (canMoveForward) {
+      if (mortor == 1) movingForward();
+      else if (mortor == 2) movingForwardB();
+    }
     break;
   case LEFT:
-    if (canMoveReverse) movingReverse();
+    if (canMoveReverse) {
+      if (mortor == 1) movingReverse();
+      else if (mortor == 2) movingReverseB();
+    }
     break;
   case ENTER:
-    start = true;
+    if (start) start = false;
+    else start = true;
     break;
-  case DELETE:
-    start = false;
+  case ' ':
+    if (stop) stop = false;
+    else stop = true;
+    break;
+  case UP:
+    mortor = 2;
+    break;
+  case DOWN:
+    mortor = 1;
     break;
   }
 }
 
 void keyReleased() {
   movingStop();
+  movingStopB();
 }
 
-void readSerial() {
+void serialEvent(Serial p) {
   while (myPort.available () > 0) {
-    String l = myPort.readStringUntil(10);
-    if (l == null) continue;
+    String l = myPort.readStringUntil('\n');
     l = trim(l);
-    if (1024 < parseInt(l)) continue;
-    else r_val = parseInt(l);
-
-    line_chart.add(r_val);
-    //println("r_val = "+r_val);
+    int value[] = int(split(l, ','));
+    r_valA = value[0];
+    r_valB = value[1];
+    myPort.write("A");
+    line_chartA.add(r_valA);
+    line_chartB.add(r_valB);
+    //println(r_valA+", "+r_valB);
   }
 }
 
