@@ -2,9 +2,11 @@ class LineChart {
   Vector vals = new Vector();
   int max_size = 1024;
   boolean max = false;
+  color lineColor = color(0, 255, 0);
 
-  LineChart(int size) {
-    max_size = size;
+  LineChart(int _size, color _c) {
+    max_size = _size;
+    lineColor = _c;
   }
 
   int get(int idx) {
@@ -22,7 +24,7 @@ class LineChart {
 
   void draw() {
     noFill();
-    stroke(0, 255, 0);
+    stroke(lineColor);
     float step_x = width / (float)(max_size);
     float step_y =  ((height-100) / 1024.0);
     for (int i = 0; i < vals.size () - 1; ++i) {    
