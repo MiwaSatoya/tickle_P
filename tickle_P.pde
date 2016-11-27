@@ -110,16 +110,21 @@ void move() {
   if (mortor == 0) {
     int fluctuation = lineChartA.getFluctuation();
     if (fluctuation == 1) {
-      if (valB < valA) movingForwardB();
-      else movingStopB();
+      canMoveForward = true;
+      canMoveReverse = false;
     }
     else if (fluctuation == -1) {
-      if (valA > valB) movingReverseB();
-      else movingStopB();
+      canMoveForward = false;
+      canMoveReverse = true;
     }
     else {
       movingStopB();
     }
+    if (valB < valA) movingForwardB();
+    else if (valA < valB) movingReverseB();
+    else movingStopB();
+    
+    if(valB <= 0 || 1023 <=valB) movingStopB();
   }
 }
 
@@ -174,12 +179,14 @@ void movingStopA() {
 }
 
 void movingForwardB() {
+  if(!canMoveForward) return;
   backColor = color(255, 0, 0);
   portB.write(1);
   //println("FOWARD");
 }
 
 void movingReverseB() {
+  if(!canMoveReverse) return;
   backColor = color(0, 0, 255);
   portB.write(2);
   //println("REVERSE");

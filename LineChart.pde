@@ -28,8 +28,8 @@ class LineChart {
     if(last-range < 0) return 0;
     int lastValue = (Integer)vals.get(last);
     int fastValue = (Integer)vals.get(last-range);
-    if(lastValue - fastValue > 10) return 1;
-    else if(lastValue - fastValue < -10) return -1;
+    if(lastValue - fastValue > 5) return 1;
+    else if(lastValue - fastValue < -5) return -1;
     else return 0;
   }
 
