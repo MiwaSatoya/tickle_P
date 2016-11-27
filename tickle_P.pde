@@ -12,6 +12,7 @@ int limitBottom = 818;  // bottom of limit
 int valA;  // resistance value mortorA
 int valB;  // resistance value mortorB
 int mortor = 0;  // 0:A, 1:B
+int speed = 0;
 color backColor = color(0);
 color colorA = color(255, 0, 0);
 color colorB = color(0, 0, 255);
@@ -33,10 +34,11 @@ void setup() {
 
   lineChartA = new LineChart(1024, colorA);
   lineChartB = new LineChart(1024, colorB);
-  
+
   cp5 = new ControlP5(this);
   cp5.addSlider("limitTop").setPosition(20, 60).setSize(200, 15).setRange(0, 1023).setValue(limitTop);
   cp5.addSlider("limitBottom").setPosition(20, 80).setSize(200, 15).setRange(0, 1023).setValue(limitBottom);
+  cp5.addSlider("speed").setPosition(20, 100).setSize(200, 15).setRange(0, 255).setValue(speed);
 }
 
 
@@ -45,11 +47,13 @@ void draw() {
 
   drawThreshold();
   tickle();
+  move();
 }
 
 void drawThreshold() {
-  int _top = (height-50) - limitTop;
-  int _bottom = (height-50) - limitBottom;
+  float _stepY = ((height-100) / 1024.0);
+  float _top = (height-50) - limitTop * _stepY;
+  float _bottom = (height-50) - limitBottom * _stepY;
 
   fill(0);
   stroke(0, 255, 0);
@@ -63,15 +67,16 @@ void drawThreshold() {
   textSize(20);
   text(String.format("valA = %d", valA), 20, height - 20);
   text(String.format("valB = %d", valB), 150, height - 20);
-  
-  if(mortor == 0) {
+
+  if (mortor == 0) {
     fill(colorA);
     text("operating mortorA", width-200, height-20);
-  } else if(mortor == 1) {
+  } 
+  else if (mortor == 1) {
     fill(colorB);
     text("operating mortorB", width-200, height-20);
   }
-  
+
   lineChartA.draw();
   lineChartB.draw();
 }
@@ -89,12 +94,31 @@ void tickle() {
       if (limitTop < valA) {
         movingReverseA();
       }
-    } else if (!canMoveReverse) {
+    } 
+    else if (!canMoveReverse) {
       if (valA < limitBottom) {
         movingForwardA();
       }
-    } else {
+    } 
+    else {
       movingStopA();
+    }
+  }
+}
+
+void move() {
+  if (mortor == 0) {
+    int fluctuation = lineChartA.getFluctuation();
+    if (fluctuation == 1) {
+      if (valB < valA) movingForwardB();
+      else movingStopB();
+    }
+    else if (fluctuation == -1) {
+      if (valA > valB) movingReverseB();
+      else movingStopB();
+    }
+    else {
+      movingStopB();
     }
   }
 }
@@ -107,7 +131,8 @@ void movingControlA() {
   if (valA < limitBottom) {
     canMoveForward = true;
     canMoveReverse = false;
-  } else if (limitTop < valA) {
+  } 
+  else if (limitTop < valA) {
     canMoveReverse = true;
     canMoveForward = false;
   }
@@ -121,8 +146,10 @@ void movingControlB() {
   if (valB < limitBottom) {
     canMoveForward = true;
     canMoveReverse = false;
-  } else if (limitTop < valB) {
-  } else if (limitTop < valA) {
+  } 
+  else if (limitTop < valB) {
+  } 
+  else if (limitTop < valA) {
     canMoveReverse = true;
     canMoveForward = false;
   }
@@ -149,19 +176,19 @@ void movingStopA() {
 void movingForwardB() {
   backColor = color(255, 0, 0);
   portB.write(1);
-  println("FOWARD");
+  //println("FOWARD");
 }
 
 void movingReverseB() {
   backColor = color(0, 0, 255);
   portB.write(2);
-  println("REVERSE");
+  //println("REVERSE");
 }
 
 void movingStopB() {
   backColor = color(0);
   portB.write(0);
-  println("STOP");
+  //println("STOP");
 }
 
 void keyPressed() {
@@ -210,7 +237,8 @@ void serialEvent(Serial p) {
       valA = parseInt(_l);
       lineChartA.add(valA);
     }
-  } else if (p == portB) {
+  } 
+  else if (p == portB) {
     while (portB.available () > 0) {
       String _l = portB.readStringUntil(10);
       if (_l == null) continue;
@@ -221,3 +249,4 @@ void serialEvent(Serial p) {
     }
   }
 }
+

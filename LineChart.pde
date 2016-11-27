@@ -21,6 +21,17 @@ class LineChart {
       max = true;
     }
   }
+  
+  int getFluctuation() {
+    int range = 10;
+    int last = (Integer)vals.size()-2;
+    if(last-range < 0) return 0;
+    int lastValue = (Integer)vals.get(last);
+    int fastValue = (Integer)vals.get(last-range);
+    if(lastValue - fastValue > 10) return 1;
+    else if(lastValue - fastValue < -10) return -1;
+    else return 0;
+  }
 
   void draw() {
     noFill();
