@@ -38,7 +38,7 @@ class LineChart {
     stroke(lineColor);
     float step_x = width / (float)(max_size);
     float step_y =  ((height-100) / 1024.0);
-    for (int i = 0; i < vals.size () - 1; ++i) {    
+    for (int i = 0; i < vals.size () - 2; ++i) {    
       float x0 = (i  ) * step_x;
       float x1 = (i+1) * step_x;
       float y0 = (height-50) - ((Integer)vals.get(i  )).intValue() * step_y;

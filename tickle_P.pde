@@ -7,6 +7,7 @@ Serial portB;
 LineChart lineChartA;
 LineChart lineChartB;
 ControlP5 cp5;
+Timer timer;
 int limitTop = 895;  // top of limit
 int limitBottom = 818;  // bottom of limit
 int valA;  // resistance value mortorA
@@ -25,8 +26,8 @@ void setup() {
   size(600, 600);
 
   println(Serial.list());
-  portA = new Serial(this, Serial.list()[1], 9600);
-  portB = new Serial(this, Serial.list()[2], 9600);
+  portA = new Serial(this, Serial.list()[2], 9600);
+  portB = new Serial(this, Serial.list()[1], 9600);
   portA.clear();
   portB.clear();
   portA.bufferUntil('\n');
@@ -39,6 +40,7 @@ void setup() {
   cp5.addSlider("limitTop").setPosition(20, 60).setSize(200, 15).setRange(0, 1023).setValue(limitTop);
   cp5.addSlider("limitBottom").setPosition(20, 80).setSize(200, 15).setRange(0, 1023).setValue(limitBottom);
   cp5.addSlider("speed").setPosition(20, 100).setSize(200, 15).setRange(0, 255).setValue(speed);
+  timer = new Timer(100);
 }
 
 
