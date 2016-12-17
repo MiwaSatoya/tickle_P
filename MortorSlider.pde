@@ -1,22 +1,25 @@
-public class MortorSlider extends LineChart {
+public class MortorSlider {
   Serial myPort;
+  LineChart lineChart;
   boolean canMoveForward = true;
   boolean canMoveReverse = true;
   color backColor = color(255);
 
-  public MortorSlider (PApplet parent, int num, color bColor) {
-    super(1024, bColor);
-
-    myPort = new Serial(parent, Serial.list()[num], 115200);
-    backColor = bColor;
+  public MortorSlider (PApplet parent, int _num, color _bColor) {
+    myPort = new Serial(parent, Serial.list()[_num], 115200);
+    lineChart = new LineChart(_num, _bColor);
+    backColor = _bColor;
+  }
+  
+  public int getDirection() {
+    return lineChart.getDirection();
   }
 
   private int getValue() {
-    if (vals.size() <= 0) return 0;
-    return getValue(getSize()-1);
+    return lineChart.getValue(lineChart.getSize()-1);
   }
 
-  public boolean isLimit(int val) {
+  private boolean isLimit(int val) {
     if (val < 0 || 1023 < val) return true;
     else return false;
   }
@@ -27,13 +30,13 @@ public class MortorSlider extends LineChart {
         int high = myPort.read();
         int low = myPort.read();
         int val = high*256 + low;
-        addValue(val);
+        lineChart.addValue(val);
       }
     }
   }
 
   public void movingControl(int num) {
-    if (isLimit(getSize()-1)) {
+    if (isLimit(lineChart.getSize()-1)) {
       canMoveForward = false;
       canMoveReverse = false;
       movingStop();
@@ -71,6 +74,10 @@ public class MortorSlider extends LineChart {
     backColor = color(0);
     myPort.write(0);
     //println("STOP");
+  }
+  
+  public void draw() {
+    lineChart.draw();
   }
 }
 

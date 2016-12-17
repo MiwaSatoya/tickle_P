@@ -9,14 +9,15 @@ public class LineChart {
     lineColor = _c;
   }
 
-  public int getValue(int idx) {
+  private int getValue(int idx) {
     if(idx < 0) return 0;
     if(max_size <= idx) return ((Integer)vals.get(max_size-1)).intValue();
     else return ((Integer)vals.get(idx)).intValue();
   }
   
-  public int getSize() {
-    if(max_size <= vals.size()) return max_size-1;
+  private int getSize() {
+    if(vals.size() <= 0) return 0;
+    else if(max_size <= vals.size()) return max_size-1;
     else return vals.size();
   }
 
@@ -31,7 +32,7 @@ public class LineChart {
     else return 0;
   }
   
-  public int getDirection() {
+  private int getDirection() {
     int fast = getValue(getSize()-2);
     int last = getValue(getSize()-1);
     if (last-fast > 0) return 1;
@@ -39,7 +40,7 @@ public class LineChart {
     else return 0;
   }
 
-  public void addValue(int val) {
+  private void addValue(int val) {
     vals.add(val);
     if (vals.size() > max_size) {
       vals.remove(0);
