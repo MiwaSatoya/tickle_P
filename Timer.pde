@@ -10,11 +10,12 @@ class Timer {
   boolean isLimitTime() {
     if (canCount) {
       int time = millis() - lastTime;
-      if (limitTime < time) {
-        println("count: "+ limitTime + "ms");
+      if (limitTime <= time) {
+        println("count: "+ time + "ms");
         canCount = false;
         return true;
-      } else {
+      } 
+      else {
         return false;
       }
     }
@@ -22,8 +23,10 @@ class Timer {
   }
 
   void startTimer() {
-    lastTime = millis();
-    canCount = true;
+    if (!canCount) {
+      lastTime = millis();
+      canCount = true;
+    }
   }
 
   void reset() {

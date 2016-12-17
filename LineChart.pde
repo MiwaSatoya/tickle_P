@@ -35,7 +35,7 @@ public class LineChart {
     int fast = getValue(getSize()-2);
     int last = getValue(getSize()-1);
     if (last-fast > 0) return 1;
-    else if (last-fast < 0) return -1;
+    else if (last-fast < 0) return 2;
     else return 0;
   }
 

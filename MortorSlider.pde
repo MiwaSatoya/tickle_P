@@ -43,7 +43,7 @@ public class MortorSlider extends LineChart {
         canMoveForward = true;
         canMoveReverse = false;
       } 
-      else if (num == -1) {
+      else if (num == 2) {
         canMoveForward = false;
         canMoveReverse = true;
       }
@@ -55,7 +55,7 @@ public class MortorSlider extends LineChart {
     if (canMoveForward) {
       myPort.write(1);
       backColor = color(255, 0, 0);
-      println("FOWARD");
+      //println("FOWARD");
     }
   }
 
@@ -63,14 +63,14 @@ public class MortorSlider extends LineChart {
     if (canMoveReverse) {
       myPort.write(2);
       backColor = color(0, 0, 255);
-      println("REVERSE");
+      //println("REVERSE");
     }
   }
 
   public void movingStop() {
     backColor = color(0);
     myPort.write(0);
-    println("STOP");
+    //println("STOP");
   }
 }
 

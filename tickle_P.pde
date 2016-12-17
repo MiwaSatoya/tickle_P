@@ -3,9 +3,9 @@ import processing.serial.*;
 import controlP5.*;
 MortorSlider mortorA;
 MortorSlider mortorB;
-ControlP5 cp5;
 Timer timer;
 int mortor = 0;  // 0:A, 1:B
+int lastTime = 0;
 final color colorA = color(255, 0, 0);
 final color colorB = color(0, 0, 255);
 
@@ -15,6 +15,7 @@ void setup() {
   println(Serial.list());
   mortorA = new MortorSlider(this, 2, colorA);
   mortorB = new MortorSlider(this, 1, colorB);
+  timer = new Timer(100);
 }
 
 
@@ -48,16 +49,20 @@ void drawThreshold() {
 
 
 void move() {
+  timer.startTimer();
   int valA = mortorA.getValue();
   int valB = mortorB.getValue();
 
   if (mortor == 0) {
-    int dir = mortorA.getDirection();
-    mortorB.movingControl(dir);
-    
+    mortorB.movingControl(mortorA.getDirection());
     if (valB < valA) mortorB.movingForward();
     else if (valA < valB) mortorB.movingReverse();
   }
+  if (timer.isLimitTime()) {
+    timer.reset();
+  }
+  //print(millis()+" - " + lastTime + " = ");
+  //println(millis() - lastTime);
 }
 
 void keyPressed() {
@@ -98,7 +103,6 @@ void serialEvent(Serial p) {
   catch(Exception e) {
     println("Error parsing:");
     e.printStackTrace();
-    noLoop();
   }
 }
 
