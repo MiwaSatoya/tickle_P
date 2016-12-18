@@ -9,19 +9,25 @@ public class LineChart {
     lineColor = _c;
   }
 
-  private int getValue(int idx) {
-    if(idx < 0) return 0;
-    if(max_size <= idx) return ((Integer)vals.get(max_size-1)).intValue();
-    else return ((Integer)vals.get(idx)).intValue();
-  }
-  
   private int getSize() {
-    if(vals.size() <= 0) return 0;
-    else if(max_size <= vals.size()) return max_size-1;
+    if (vals.size() <= 0) return 0;
+    else if (max_size <= vals.size()) return max_size-1;
     else return vals.size();
   }
 
-  public int getFluctuation() {
+  private int getValue() {
+    if (vals.size() <= 0) return 0;
+    if (max_size <= vals.size()) return ((Integer)vals.get(max_size-1)).intValue();
+    else return ((Integer)vals.get(vals.size()-1)).intValue();
+  }
+
+  private int getValue(int idx) {
+    if (idx <= 0) return 0;
+    if (max_size <= idx) return ((Integer)vals.get(max_size-1)).intValue();
+    else return ((Integer)vals.get(idx)).intValue();
+  }
+
+  private int getFluctuation() {
     int range = 10;
     int last = getSize()-1;
     if (last-range < 0) return 0;
@@ -31,10 +37,18 @@ public class LineChart {
     else if (lastValue - fastValue < 0) return -1;
     else return 0;
   }
-  
+
   private int getDirection() {
     int fast = getValue(getSize()-2);
     int last = getValue(getSize()-1);
+    if (last-fast > 0) return 1;
+    else if (last-fast < 0) return 2;
+    else return 0;
+  }
+
+  private int getDirection(int idx) {
+    int fast = getValue(idx-2);
+    int last = getValue(idx-1);
     if (last-fast > 0) return 1;
     else if (last-fast < 0) return 2;
     else return 0;
@@ -52,6 +66,8 @@ public class LineChart {
   public void draw() {
     noFill();
     stroke(lineColor);
+    rect(0, 50, width, height-100);
+    
     final int h = height-50;
     final float step_x = width / (float)(max_size);
     final float step_y =  (h-50) / 1024.0;

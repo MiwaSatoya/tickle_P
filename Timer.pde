@@ -3,8 +3,8 @@ class Timer {
   int limitTime = 0;
   boolean canCount = false;
 
-  Timer(int lt) {
-    limitTime = lt;
+  Timer(int _lt) {
+    limitTime = _lt;
   }
 
   boolean isLimitTime() {
@@ -22,8 +22,9 @@ class Timer {
     return false;
   }
 
-  void startTimer() {
+  void startTimer(int lt) {
     if (!canCount) {
+      limitTime = lt;
       lastTime = millis();
       canCount = true;
     }

@@ -5,7 +5,8 @@ MortorSlider mortorA;
 MortorSlider mortorB;
 Timer timer;
 int mortor = 0;  // 0:A, 1:B
-int lastTime = 0;
+int lastTimeA = 0;
+int lastTimeB = 0;
 final color colorA = color(255, 0, 0);
 final color colorB = color(0, 0, 255);
 
@@ -13,7 +14,7 @@ void setup() {
   size(600, 600);
 
   println(Serial.list());
-  mortorA = new MortorSlider(this, 2, colorA);
+  mortorA = new MortorSlider(this, 3, colorA);
   mortorB = new MortorSlider(this, 1, colorB);
   timer = new Timer(100);
 }
@@ -21,20 +22,16 @@ void setup() {
 
 void draw() {
   background(0);
-
-  drawThreshold();
+  
+  drawGraph();
   move();
 }
 
-void drawThreshold() {
-  noFill();
-  stroke(0, 255, 0);
-  rect(0, 50, width, height-100);
-
+void drawGraph() {
   fill(0, 255, 0);
   textSize(20);
-  text(String.format("valA = %d", mortorA.getValue()), 20, height - 20);
-  text(String.format("valB = %d", mortorB.getValue()), 150, height - 20);
+  text(String.format("valA = %d", mortorA.lineChart.getValue()), 20, height - 20);
+  text(String.format("valB = %d", mortorB.lineChart.getValue()), 150, height - 20);
   if (mortor == 0) {
     fill(colorA);
     text("operating mortorA", width-200, height-20);
@@ -43,26 +40,28 @@ void drawThreshold() {
     fill(colorB);
     text("operating mortorB", width-200, height-20);
   }
-  mortorA.draw();
-  mortorB.draw();
+  mortorA.lineChart.draw();
+  mortorB.lineChart.draw();
 }
 
-
 void move() {
-  timer.startTimer();
-  int valA = mortorA.getValue();
-  int valB = mortorB.getValue();
+  //lastTime = millis();
+  //timer.startTimer(20);
+  int valA = mortorA.lineChart.getValue(448);
+  int valB = mortorB.lineChart.getValue();
 
   if (mortor == 0) {
-    mortorB.movingControl(mortorA.getDirection());
+    mortorB.movingControl(mortorA.lineChart.getDirection(448));
     if (valB < valA) mortorB.movingForward();
     else if (valA < valB) mortorB.movingReverse();
   }
+  /*
   if (timer.isLimitTime()) {
     timer.reset();
   }
-  //print(millis()+" - " + lastTime + " = ");
-  //println(millis() - lastTime);
+  print(millis()+" - " + lastTime + " = ");
+  println(millis() - lastTime);
+  */
 }
 
 void keyPressed() {
@@ -91,13 +90,27 @@ void keyReleased() {
   }
 }
 
+int cntA = 0;
+int cntB = 0;
 void serialEvent(Serial p) {
   try {
     if (p == mortorA.myPort) {
       mortorA.setValue();
+      cntA++;
+      if(cntA == 576) {
+        println("A " + (millis() - lastTimeA));
+        lastTimeA = millis();
+        cntA = 0;
+      }
     } 
     else if (p == mortorB.myPort) {
       mortorB.setValue();
+      cntB++;
+      if(cntB == 576) {
+        println("B " + (millis() - lastTimeB));
+        lastTimeB = millis();
+        cntB = 0;
+      }
     }
   }
   catch(Exception e) {
